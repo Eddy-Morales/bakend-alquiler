@@ -4,6 +4,7 @@ import dotenv from 'dotenv'
 import cors from 'cors';
 import routerVeterinarios from './routers/veterinario_routes.js';
 
+dotenv.config();
 
 
 // Inicializaciones
