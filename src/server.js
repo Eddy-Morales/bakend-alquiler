@@ -13,7 +13,11 @@ dotenv.config()
 
 // Configuraciones 
 app.set('port',process.env.PORT || 3000)  //const port=3000
-app.use(cors())
+app.use(cors({
+    origin: "*", // Permite acceso desde cualquier dominio
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
 // Middlewares 
 app.use(express.json())

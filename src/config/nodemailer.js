@@ -34,4 +34,7 @@ const sendMailToRegister = (userMail, token) => {
     })
 }
 
-export default sendMailToRegister
+export {
+    sendMailToRegister,
+    sendMailToRecoveryPassword
+}
