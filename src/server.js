@@ -9,7 +9,7 @@ dotenv.config();
 
 // Inicializaciones
 const app = express()
-dotenv.config()
+
 
 // Configuraciones 
 app.set('port',process.env.PORT || 3000)  //const port=3000
