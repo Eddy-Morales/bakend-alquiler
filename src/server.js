@@ -4,20 +4,15 @@ import dotenv from 'dotenv'
 import cors from 'cors';
 import routerVeterinarios from './routers/veterinario_routes.js';
 
-dotenv.config();
 
 
 // Inicializaciones
 const app = express()
-
+dotenv.config()
 
 // Configuraciones 
 app.set('port',process.env.PORT || 3000)  //const port=3000
-app.use(cors({
-    origin: "*", // Permite acceso desde cualquier dominio
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"]
-}));
+app.use(cors())
 
 // Middlewares 
 app.use(express.json())
