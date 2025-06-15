@@ -1,35 +1,27 @@
-// Requerir los módulos
 import express from 'express'
 import dotenv from 'dotenv'
-import cors from 'cors';
-import routerVeterinarios from './routers/veterinario_routes.js';
+import cors from 'cors'
 
+// Cambiar esta línea:
+import routerArrendatarios from './routers/arrendatario_routes.js'
 
-
-// Inicializaciones
 const app = express()
 dotenv.config()
 
-// Configuraciones 
-app.set('port',process.env.PORT || 3000)  //const port=3000
-app.use(cors())
+app.set('port', process.env.PORT || 3000)
 
-// Middlewares 
+app.use(cors())
 app.use(express.json())
 
-
-// Variables globales
-
-
-// Rutas 
-app.get('/',(req,res)=>{
-    res.send("Server on")
+// Ruta base
+app.get('/', (req, res) => {
+  res.send("Server on")
 })
-// Rutas para veterinarios
-app.use('/api',routerVeterinarios)  //http://localhost:3000/api
 
-// Manejo de una ruta que no sea encontrada
-app.use((req,res)=>res.status(404).send("Endpoint no encontrado - 404"))
+// Rutas para arrendatarios
+app.use('/api', routerArrendatarios) // http://localhost:3000/api
 
-// Exportar la instancia de express por medio de app
-export default  app
+// Ruta no encontrada
+app.use((req, res) => res.status(404).send("Endpoint no encontrado - 404"))
+
+export default app
