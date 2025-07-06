@@ -1,6 +1,9 @@
 import Arrendatario from "../models/Arrendatario.js"
 import { sendMailToRegister, sendMailToRecoveryPassword } from "../config/nodemailer.js"
 
+import { crearTokenJWT } from "../middlewares/JWT.js"
+import mongoose from "mongoose"
+
 const registro = async (req, res) => {
   const { email, password } = req.body
   if (Object.values(req.body).includes("")) return res.status(400).json({ msg: "todos los campos son obligatorios" })
@@ -65,7 +68,49 @@ const login = async (req, res) => {
   const verificarPassword = await arrendatarioBDD.matchPassword(password)
   if (!verificarPassword) return res.status(401).json({ msg: "Lo sentimos, la contraseña es incorrecta" })
   const { nombre, apellido, direccion, telefono, _id, rol } = arrendatarioBDD
-  res.status(200).json({ rol, nombre, apellido, direccion, telefono, _id })
+  const token = crearTokenJWT(arrendatarioBDD._id,arrendatarioBDD.rol)
+
+  res.status(200).json({ token, rol, nombre, apellido, direccion, telefono, _id })
+}
+
+const perfil =(req,res)=>{
+		const {token,confirmEmail,createdAt,updatedAt,__v,...datosPerfil} = req.arrendatarioBDD
+    res.status(200).json(datosPerfil)
+}
+
+const actualizarPerfil = async (req,res)=>{
+    const {id} = req.params
+    const {nombre,apellido,direccion,celular,email} = req.body
+    if( !mongoose.Types.ObjectId.isValid(id) ) return res.status(404).json({msg:`Lo sentimos, debe ser un id válido`});
+    if (Object.values(req.body).includes("")) return res.status(400).json({msg:"Lo sentimos, debes llenar todos los campos"})
+    const arrendatarioBDD = await Arrendatario.findById(id)
+    if(!arrendatarioBDD) return res.status(404).json({msg:`Lo sentimos, no existe el arrendatario ${id}`})
+    if (arrendatarioBDD.email != email)
+    {
+        const arrendatarioBDDMail = await Arrendatario.findOne({email})
+        if (arrendatarioBDDMail)
+        {
+            return res.status(404).json({msg:`Lo sentimos, el email existe ya se encuentra registrado`})  
+        }
+    }
+    arrendatarioBDD.nombre = nombre ?? arrendatarioBDD.nombre
+    arrendatarioBDD.apellido = apellido ?? arrendatarioBDD.apellido
+    arrendatarioBDD.direccion = direccion ?? arrendatarioBDD.direccion
+    arrendatarioBDD.celular = celular ?? arrendatarioBDD.celular
+    arrendatarioBDD.email = email ?? arrendatarioBDD.email
+    await arrendatarioBDD.save()
+    console.log(arrendatarioBDD)
+    res.status(200).json(arrendatarioBDD)
+}
+
+const actualizarPassword = async (req,res)=>{
+    const arrendatarioBDD = await Arrendatario.findById(req.arrendatarioBDD._id)
+    if(!arrendatarioBDD) return res.status(404).json({msg:`Lo sentimos, no existe el veterinario ${id}`})
+    const verificarPassword = await arrendatarioBDD.matchPassword(req.body.passwordactual)
+    if(!verificarPassword) return res.status(404).json({msg:"Lo sentimos, el password actual no es el correcto"})
+    arrendatarioBDD.password = await arrendatarioBDD.encrypPassword(req.body.passwordnuevo)
+    await arrendatarioBDD.save()
+    res.status(200).json({msg:"Password actualizado correctamente"})
 }
 
 export {
@@ -74,5 +119,8 @@ export {
   recuperarPassword,
   comprobarTokenPasword,
   crearNuevoPassword,
-  login
+  login,
+  perfil,
+  actualizarPerfil,
+  actualizarPassword
 }
