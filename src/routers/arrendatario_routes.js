@@ -10,7 +10,8 @@ import {
   perfil,
   recuperarPassword,
   registro,
-  listarArrendatarios
+  listarArrendatarios,
+  subirAvatar
 } from '../controllers/arrendatario_controller.js'
 
 import { verificarTokenJWT } from '../middlewares/JWT.js'
@@ -26,8 +27,9 @@ router.post('/login', login)
 router.get('/perfil',verificarTokenJWT,perfil)
 router.put('/arrendatario/:id',verificarTokenJWT,actualizarPerfil)
 router.put('/arrendatario/actualizarpassword/:id',verificarTokenJWT,actualizarPassword)
-
 router.get("/arrendatarios",verificarTokenJWT,listarArrendatarios)
+
+router.put('/arrendatario/avatar', verificarTokenJWT, subirAvatar)
 
 router.get("/auth/google", passport.authenticate("google", {
   scope: ["profile", "email"]

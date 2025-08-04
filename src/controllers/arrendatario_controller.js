@@ -140,6 +140,45 @@ const listarArrendatarios = async (req, res) => {
     }
 };
 
+const subirAvatar = async (req, res) => {
+  try {
+    const arrendatarioBDD = await Arrendatario.findById(req.arrendatarioBDD._id)
+    if (!arrendatarioBDD) return res.status(404).json({ msg: "Arrendatario no encontrado" })
+
+    if (!req.files || !req.files.avatar) {
+      return res.status(400).json({ msg: "No se ha enviado ninguna imagen" })
+    }
+
+    const tempFilePath = req.files.avatar.tempFilePath
+
+    // Eliminar avatar anterior si existe
+    if (arrendatarioBDD.avatarArrenID) {
+      await cloudinary.uploader.destroy(arrendatarioBDD.avatarArrenID)
+    }
+
+    // Subir nueva imagen
+    const resultado = await cloudinary.uploader.upload(tempFilePath, {
+      folder: "avataresArrendatario"
+    })
+
+    // Guardar datos del nuevo avatar
+    arrendatarioBDD.avatarArren = resultado.secure_url
+    arrendatarioBDD.avatarArrenID = resultado.public_id
+    await arrendatarioBDD.save()
+
+    // Eliminar archivo temporal
+    await fs.remove(tempFilePath)
+
+    res.status(200).json({
+      msg: "Avatar actualizado correctamente",
+      avatarUrl: resultado.secure_url
+    })
+  } catch (error) {
+    console.error("Error al subir avatar:", error)
+    res.status(500).json({ msg: "Error al procesar la imagen", error: error.message })
+  }
+}
+
 export {
   registro,
   confirmarMail,
@@ -150,5 +189,6 @@ export {
   perfil,
   actualizarPerfil,
   actualizarPassword,
-  listarArrendatarios
+  listarArrendatarios,
+  subirAvatar
 }
