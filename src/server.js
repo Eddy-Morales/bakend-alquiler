@@ -12,7 +12,7 @@ import cloudinary from 'cloudinary'
 import fileUpload from "express-fileupload"
 
 import passport from "passport";
-import "../config/passport.js";
+import "./config/passport.js";
 
 
 const app = express()
