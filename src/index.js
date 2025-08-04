@@ -6,15 +6,13 @@ import http from 'http'
 import { Server } from 'socket.io'
 
 
-
-
 connection()
 
 const server = http.createServer(app)
 
 const io = new Server(server, {
     cors: {
-        origin: `https://panaroom.netlify.app`
+        origin: "https://panaroom.netlify.app"
     }
 })
 
