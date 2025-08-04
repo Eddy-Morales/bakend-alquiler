@@ -11,9 +11,11 @@ connection()
 const server = http.createServer(app)
 
 const io = new Server(server, {
-    cors: {
-        origin: "https://panaroom.netlify.app"
-    }
+  cors: {
+    origin: "https://panaroom.netlify.app",
+    methods: ["GET", "POST"],
+    credentials: true
+  }
 })
 
 io.on('connection', (socket) => {
