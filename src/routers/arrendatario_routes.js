@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import passport from "passport";
 import {
   actualizarPassword,
   actualizarPerfil,
@@ -27,5 +28,18 @@ router.put('/arrendatario/:id',verificarTokenJWT,actualizarPerfil)
 router.put('/arrendatario/actualizarpassword/:id',verificarTokenJWT,actualizarPassword)
 
 router.get("/arrendatarios",verificarTokenJWT,listarArrendatarios)
+
+router.get("/auth/google", passport.authenticate("google", {
+  scope: ["profile", "email"]
+}));
+
+router.get("/auth/google/callback",
+  passport.authenticate("google", { session: false, failureRedirect: "/login" }),
+  (req, res) => {
+    const { token, usuario } = req.user;
+    const { nombre, apellido, direccion, celular, _id, rol } = usuario;
+    res.status(200).json({ token, nombre, apellido, direccion, celular, _id, rol });
+  }
+);
 
 export default router

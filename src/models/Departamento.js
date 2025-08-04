@@ -44,10 +44,10 @@ const departamentoSchema = new Schema({
     type: [String], // Ejemplo: ['Agua', 'Luz', 'Internet']
     default: []
   },
-  imagenes: {
-    type: [String], // URLs de imágenes
-    default: []
-  },
+  imagenes: [{
+  url: { type: String, required: true },
+  public_id: { type: String, required: true }
+}],
   arrendatario: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Arrendatario' // O 'Propietario', según tu modelo

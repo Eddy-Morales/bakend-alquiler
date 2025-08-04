@@ -32,6 +32,18 @@ const arrendatarioSchema = new Schema({
     type: String,
     require: true
   },
+  avatarArren:{
+    type:String,
+    trim:true
+  },
+  avatarArrenID:{
+    type:String,
+    trim:true
+  },
+  avatarArrenIA:{
+    type:String,
+    trim:true
+  },
   status: {
     type: Boolean,
     default: true

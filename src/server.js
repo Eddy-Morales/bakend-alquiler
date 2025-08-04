@@ -2,7 +2,7 @@ import express from 'express'
 import dotenv from 'dotenv'
 import cors from 'cors'
 
-// Cambiar esta línea:
+
 import routerArrendatarios from './routers/arrendatario_routes.js'
 
 import routerAdministradores from './routers/administrador_routes.js'
@@ -11,12 +11,17 @@ import routerDepartamentos from './routers/depa_routes.js'
 import cloudinary from 'cloudinary'
 import fileUpload from "express-fileupload"
 
+import passport from "passport";
+import "../config/passport.js";
 
 
 const app = express()
 dotenv.config()
 
 // Inicializaciones
+
+app.use(passport.initialize());
+
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
@@ -35,6 +40,9 @@ app.set('port', process.env.PORT || 3000)
 
 app.use(cors())
 app.use(express.json())
+
+
+
 
 // Ruta base
 app.get('/', (req, res) => {

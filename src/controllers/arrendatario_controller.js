@@ -60,18 +60,35 @@ const crearNuevoPassword = async (req, res) => {
 }
 
 const login = async (req, res) => {
-  const { email, password } = req.body
-  if (Object.values(req.body).includes("")) return res.status(400).json({ msg: "Lo sentimos, debes llenar todos los campos" })
-  const arrendatarioBDD = await Arrendatario.findOne({ email }).select("-status -__v -token -updatedAt -createdAt")
-  if (arrendatarioBDD?.confirmEmail === false) return res.status(401).json({ msg: "Lo sentimos, debe verificar su cuenta, antes de iniciar sesión" })
-  if (!arrendatarioBDD) return res.status(404).json({ msg: "Lo sentimos, el usuario no se encuentra registrado" })
-  const verificarPassword = await arrendatarioBDD.matchPassword(password)
-  if (!verificarPassword) return res.status(401).json({ msg: "Lo sentimos, la contraseña es incorrecta" })
-  const { nombre, apellido, direccion, telefono, _id, rol } = arrendatarioBDD
-  const token = crearTokenJWT(arrendatarioBDD._id,arrendatarioBDD.rol)
+  const { email, password } = req.body;
+  if (Object.values(req.body).includes("")) {
+    return res.status(400).json({ msg: "Lo sentimos, debes llenar todos los campos" });
+  }
 
-  res.status(200).json({ token, rol, nombre, apellido, direccion, telefono, _id })
-}
+  const arrendatarioBDD = await Arrendatario.findOne({ email }).select("-status -__v -token -updatedAt -createdAt");
+  if (!arrendatarioBDD) {
+    return res.status(404).json({ msg: "Lo sentimos, el usuario no se encuentra registrado" });
+  }
+
+  if (!arrendatarioBDD.password) {
+    return res.status(400).json({ msg: "Este usuario debe iniciar sesión con Google" });
+  }
+
+  if (arrendatarioBDD.confirmEmail === false) {
+    return res.status(401).json({ msg: "Lo sentimos, debe verificar su cuenta, antes de iniciar sesión" });
+  }
+
+  const verificarPassword = await arrendatarioBDD.matchPassword(password);
+  if (!verificarPassword) {
+    return res.status(401).json({ msg: "Lo sentimos, la contraseña es incorrecta" });
+  }
+
+  const { nombre, apellido, direccion, celular, _id, rol } = arrendatarioBDD;
+  const token = crearTokenJWT(arrendatarioBDD._id, arrendatarioBDD.rol);
+
+  res.status(200).json({ token, rol, nombre, apellido, direccion, celular, _id });
+};
+
 
 const perfil =(req,res)=>{
 		const {token,confirmEmail,createdAt,updatedAt,__v,...datosPerfil} = req.arrendatarioBDD
