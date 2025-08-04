@@ -5,8 +5,31 @@ import cors from 'cors'
 // Cambiar esta línea:
 import routerArrendatarios from './routers/arrendatario_routes.js'
 
+import routerAdministradores from './routers/administrador_routes.js'
+import routerDepartamentos from './routers/depa_routes.js'
+
+import cloudinary from 'cloudinary'
+import fileUpload from "express-fileupload"
+
+
+
 const app = express()
 dotenv.config()
+
+// Inicializaciones
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+})
+
+
+app.use(fileUpload({
+    useTempFiles : true,
+    tempFileDir : './uploads'
+}))
+
+
 
 app.set('port', process.env.PORT || 3000)
 
@@ -21,7 +44,13 @@ app.get('/', (req, res) => {
 // Rutas para arrendatarios
 app.use('/api', routerArrendatarios) // http://localhost:3000/api
 
+// ruta para administrador
+app.use('/api', routerAdministradores) // http://localhost:3000/api
+
+app.use('/api', routerDepartamentos) // http://localhost:3000/api
+
 // Ruta no encontrada
 app.use((req, res) => res.status(404).send("Endpoint no encontrado - 404"))
+
 
 export default app

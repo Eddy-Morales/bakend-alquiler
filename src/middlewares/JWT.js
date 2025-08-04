@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken"
 import Arrendatario from "../models/Arrendatario.js"
+import Administrador from "../models/Administrador.js"
 
 const crearTokenJWT = (id, rol) => {
 
@@ -18,7 +19,14 @@ const verificarTokenJWT = async (req, res, next) => {
         if (rol === "arrendatario") {
             req.arrendatarioBDD = await Arrendatario.findById(id).lean().select("-password")
             next()
+        }else if (rol === "administrador") {
+            req.administradorBDD = await Administrador.findById(id).lean().select("-password")
+            next()
+        } else {
+            return res.status(401).json({ msg: "Rol no autorizado" });
         }
+
+
     } catch (error) {
         return res.status(401).json({ msg: "Token inválido o expirado" });
     }

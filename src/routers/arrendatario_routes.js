@@ -9,6 +9,7 @@ import {
   perfil,
   recuperarPassword,
   registro,
+  listarArrendatarios
 } from '../controllers/arrendatario_controller.js'
 
 import { verificarTokenJWT } from '../middlewares/JWT.js'
@@ -24,5 +25,7 @@ router.post('/login', login)
 router.get('/perfil',verificarTokenJWT,perfil)
 router.put('/arrendatario/:id',verificarTokenJWT,actualizarPerfil)
 router.put('/arrendatario/actualizarpassword/:id',verificarTokenJWT,actualizarPassword)
+
+router.get("/arrendatarios",verificarTokenJWT,listarArrendatarios)
 
 export default router
