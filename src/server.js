@@ -38,7 +38,11 @@ app.use(fileUpload({
 
 app.set('port', process.env.PORT || 3000)
 
-app.use(cors())
+app.use(cors({
+  origin: "https://panaroom.netlify.app",
+  methods: ["GET", "POST"],
+  credentials: true
+}))
 app.use(express.json())
 
 
