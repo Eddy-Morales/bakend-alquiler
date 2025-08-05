@@ -4,9 +4,9 @@ import { registrarDepartamento,listarDepartamento,eliminarDepa} from '../control
 
 const router = Router()
 
-router.post('/departamento/registro', verificarTokenJWT, registrarDepartamento) // http://localhost:3000/api/departamento/registro
+router.post('/departamento/registro', verificarTokenJWT, registrarDepartamento)
 router.get('/departamentos', verificarTokenJWT, listarDepartamento) 
-router.delete('/tratamiento/:id',verificarTokenJWT,eliminarDepa)
+router.delete('/departamento/:id',verificarTokenJWT,eliminarDepa)
 
 
 export default router

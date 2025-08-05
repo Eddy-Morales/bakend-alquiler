@@ -1,6 +1,9 @@
 import Departamento from "../models/Departamento.js"
 import mongoose from "mongoose"
 
+import { v2 as cloudinary } from 'cloudinary'; // Para subir imágenes
+import fs from 'fs-extra'; // Para eliminar archivos temporales
+
 import { Stripe } from "stripe"
 
 const registrarDepartamento = async (req, res) => {
