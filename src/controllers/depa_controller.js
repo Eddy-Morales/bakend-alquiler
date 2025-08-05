@@ -59,12 +59,17 @@ const listarDepartamento = async (req,res)=>{
     res.status(200).json(departamentos)
 }
 
-const eliminarDepa = async(req,res)=>{
-    const {id} = req.params
-    if( !mongoose.Types.ObjectId.isValid(id) ) return res.status(404).json({msg:`Lo sentimos, no existe ese Departamento`})
-    await Departamento.findByIdAndDelete(req.params.id)
-    res.status(200).json({msg:"Departamento eliminado correctamente"})
-}
+const eliminarDepa = async (req, res) => {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ msg: "ID de departamento no válido" });
+    }
+    const depaEliminado = await Departamento.findByIdAndDelete(id);
+    if (!depaEliminado) {
+        return res.status(404).json({ msg: "Departamento no encontrado" });
+    }
+    res.status(200).json({ msg: "Departamento eliminado correctamente" });
+};
 
 
 export {
