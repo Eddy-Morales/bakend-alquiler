@@ -1,54 +1,58 @@
 import Departamento from "../models/Departamento.js"
-import mongoose from "mongoose"
-
-import { v2 as cloudinary } from 'cloudinary'; // Para subir imágenes
-import fs from 'fs-extra'; // Para eliminar archivos temporales
-
-import { Stripe } from "stripe"
+import { v2 as cloudinary } from 'cloudinary';
+import fs from 'fs-extra';
+import mongoose from 'mongoose';
 
 const registrarDepartamento = async (req, res) => {
   try {
     const { arrendatario } = req.body;
 
+    // Validación básica
     if (!mongoose.Types.ObjectId.isValid(arrendatario)) {
-      return res.status(400).json({ msg: "Lo sentimos, el ID del arrendatario no es válido." });
+      return res.status(400).json({ msg: "El ID del arrendatario no es válido." });
+    }
+
+    if (Object.values(req.body).includes("")) {
+      return res.status(400).json({ msg: "Todos los campos son obligatorios." });
     }
 
     const imagenesSubidas = [];
 
-    // ✅ Verifica si hay imágenes adjuntas
+    // 📷 Subida de imágenes desde dispositivo
     if (req.files?.imagenes) {
-      const archivos = Array.isArray(req.files.imagenes) ? req.files.imagenes : [req.files.imagenes];
+      const archivos = Array.isArray(req.files.imagenes)
+        ? req.files.imagenes
+        : [req.files.imagenes];
 
       for (const archivo of archivos) {
-        const resultado = await cloudinary.uploader.upload(archivo.tempFilePath, {
-          folder: "Departamentos"
-        });
+        const { secure_url, public_id } = await cloudinary.uploader.upload(
+          archivo.tempFilePath,
+          { folder: "Departamentos" }
+        );
 
-        imagenesSubidas.push({
-          url: resultado.secure_url,
-          public_id: resultado.public_id
-        });
-
-        await fs.remove(archivo.tempFilePath);
+        imagenesSubidas.push({ url: secure_url, public_id });
+        await fs.unlink(archivo.tempFilePath);
       }
     }
 
-    const nuevoDepartamento = await Departamento.create({
+    const nuevoDepartamento = new Departamento({
       ...req.body,
       imagenes: imagenesSubidas
     });
 
+    await nuevoDepartamento.save();
+
     res.status(201).json({
-      msg: "Registro exitoso de departamento",
+      msg: "Departamento registrado exitosamente",
       departamento: nuevoDepartamento
     });
 
   } catch (error) {
     console.error("Error al registrar departamento:", error);
-    res.status(500).json({ msg: "Error al registrar el departamento", error: error.message });
+    res.status(500).json({ msg: "Error interno", error: error.message });
   }
-}
+};
+
 
 const listarDepartamento = async (req,res)=>{
     const departamentos = await Departamento.find()
