@@ -17,6 +17,8 @@ const io = new Server(server, {
 })
 
 io.on('connection', (socket) => {
+  console.log("conexiòn establecida")
+  console.log(socket)
   console.log('Usuario conectado', socket.id)
 
   socket.on('enviar-mensaje-front-back', (payload) => {
