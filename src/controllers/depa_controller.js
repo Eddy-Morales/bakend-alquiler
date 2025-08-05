@@ -71,9 +71,31 @@ const eliminarDepa = async (req, res) => {
     res.status(200).json({ msg: "Departamento eliminado correctamente" });
 };
 
+const verDepartamentoPorId = async (req, res) => {
+  const { id } = req.params;
+
+  // Validar ID
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ msg: "ID de departamento no válido." });
+  }
+
+  try {
+    const departamento = await Departamento.findById(id);
+
+    if (!departamento) {
+      return res.status(404).json({ msg: "Departamento no encontrado." });
+    }
+
+    res.status(200).json(departamento);
+  } catch (error) {
+    console.error("Error al obtener departamento:", error);
+    res.status(500).json({ msg: "Error interno", error: error.message });
+  }
+};
 
 export {
     registrarDepartamento,
     listarDepartamento,
-    eliminarDepa
+    eliminarDepa,
+    verDepartamentoPorId
   }
