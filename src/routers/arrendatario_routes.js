@@ -40,7 +40,7 @@ router.get("/auth/google/callback",
     const { nombre, apellido, direccion, celular, _id, rol, email } = usuario;
     
     // URL del frontend (debe configurarse en variables de entorno)
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173'; // Ajusta esto según tu configuración
+    const frontendUrl = process.env.URL_FRONTEND; // Ajusta esto según tu configuración
     
     // Construir la URL de redirección con los datos necesarios
     const redirectUrl = `${frontendUrl}/auth/success?token=${token}&_id=${_id}&nombre=${encodeURIComponent(nombre || '')}&apellido=${encodeURIComponent(apellido || '')}&direccion=${encodeURIComponent(direccion || '')}&celular=${encodeURIComponent(celular || '')}&rol=${rol || 'arrendatario'}&email=${encodeURIComponent(email || '')}`;
