@@ -4,12 +4,12 @@ import bcrypt from 'bcryptjs'
 const arrendatarioSchema = new Schema({
   nombre: {
     type: String,
-    require: true,
+    required: true,
     trim: true
   },
   apellido: {
     type: String,
-    require: true,
+    required: true,
     trim: true
   },
   direccion: {
@@ -24,13 +24,9 @@ const arrendatarioSchema = new Schema({
   },
   email: {
     type: String,
-    require: true,
+    required: true,
     trim: true,
     unique: true
-  },
-  password: {
-    type: String,
-    require: true
   },
   avatarArren:{
     type:String,

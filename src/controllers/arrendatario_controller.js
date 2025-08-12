@@ -4,6 +4,12 @@ import { sendMailToRegister, sendMailToRecoveryPassword } from "../config/nodema
 import { crearTokenJWT } from "../middlewares/JWT.js"
 import mongoose from "mongoose"
 
+import { v2 as cloudinary } from 'cloudinary';
+import fs from 'fs-extra';
+
+
+
+
 const registro = async (req, res) => {
   const { email, password } = req.body
   if (Object.values(req.body).includes("")) return res.status(400).json({ msg: "todos los campos son obligatorios" })
@@ -95,30 +101,86 @@ const perfil =(req,res)=>{
     res.status(200).json(datosPerfil)
 }
 
-const actualizarPerfil = async (req,res)=>{
-    const {id} = req.params
-    const {nombre,apellido,direccion,celular,email} = req.body
-    if( !mongoose.Types.ObjectId.isValid(id) ) return res.status(404).json({msg:`Lo sentimos, debe ser un id válido`});
-    if (Object.values(req.body).includes("")) return res.status(400).json({msg:"Lo sentimos, debes llenar todos los campos"})
-    const arrendatarioBDD = await Arrendatario.findById(id)
-    if(!arrendatarioBDD) return res.status(404).json({msg:`Lo sentimos, no existe el arrendatario ${id}`})
-    if (arrendatarioBDD.email != email)
-    {
-        const arrendatarioBDDMail = await Arrendatario.findOne({email})
-        if (arrendatarioBDDMail)
-        {
-            return res.status(404).json({msg:`Lo sentimos, el email existe ya se encuentra registrado`})  
+const actualizarPerfil = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { nombre, apellido, direccion, celular, email, profileImageOption } = req.body;
+        
+        if (!mongoose.Types.ObjectId.isValid(id)) 
+            return res.status(404).json({ msg: `Lo sentimos, debe ser un id válido` });
+        
+        // No verificamos campos vacíos para permitir actualizaciones parciales
+        
+        const arrendatarioBDD = await Arrendatario.findById(id);
+        if (!arrendatarioBDD) 
+            return res.status(404).json({ msg: `Lo sentimos, no existe el arrendatario ${id}` });
+        
+        // Verificar si el email ya existe (solo si se está cambiando)
+        if (email && arrendatarioBDD.email !== email) {
+            const arrendatarioBDDMail = await Arrendatario.findOne({ email });
+            if (arrendatarioBDDMail) {
+                return res.status(404).json({ msg: `Lo sentimos, el email ya se encuentra registrado `});
+            }
         }
+        
+        // Actualizar campos básicos
+        arrendatarioBDD.nombre = nombre ?? arrendatarioBDD.nombre;
+        arrendatarioBDD.apellido = apellido ?? arrendatarioBDD.apellido;
+        arrendatarioBDD.direccion = direccion ?? arrendatarioBDD.direccion;
+        arrendatarioBDD.celular = celular ?? arrendatarioBDD.celular;
+        arrendatarioBDD.email = email ?? arrendatarioBDD.email;
+        
+        // Si se envió una opción de imagen de perfil, la guardamos
+        if (profileImageOption) {
+            arrendatarioBDD.avatarType = profileImageOption;
+        }
+        
+        // Procesar la imagen subida
+        if (profileImageOption === 'upload' && req.files && req.files.avatarArren) {
+            // Si ya hay una imagen anterior, la eliminamos de Cloudinary
+            if (arrendatarioBDD.avatarArrenID) {
+                await cloudinary.uploader.destroy(arrendatarioBDD.avatarArrenID);
+            }
+            
+            // Subir la nueva imagen
+            const resultado = await cloudinary.uploader.upload(req.files.avatarArren.tempFilePath, {
+                folder: "avataresArrendatario"
+            });
+            
+            // Guardar datos de la nueva imagen
+            arrendatarioBDD.avatarUrl = resultado.secure_url;
+            arrendatarioBDD.avatarArrenID = resultado.public_id;
+            
+            // Eliminar archivo temporal
+            await fs.remove(req.files.avatarArren.tempFilePath);
+        } 
+        // Procesar la imagen generada por IA
+        else if (profileImageOption === 'ia' && req.body.avatarArrenIA) {
+            // Si ya hay una imagen anterior, la eliminamos de Cloudinary
+            if (arrendatarioBDD.avatarArrenID) {
+                await cloudinary.uploader.destroy(arrendatarioBDD.avatarArrenID);
+            }
+            
+            // Subir la imagen base64 a Cloudinary
+            const resultado = await cloudinary.uploader.upload(req.body.avatarArrenIA, {
+                folder: "avataresArrendatario"
+            });
+            
+            // Guardar datos de la nueva imagen
+            arrendatarioBDD.avatarUrl = resultado.secure_url;
+            arrendatarioBDD.avatarArrenID = resultado.public_id;
+        }
+        
+        // Guardar cambios en la base de datos
+        await arrendatarioBDD.save();
+        
+        // Devolver el arrendatario actualizado
+        res.status(200).json(arrendatarioBDD);
+    } catch (error) {
+        console.error("Error al actualizar perfil:", error);
+        res.status(500).json({ msg: "Error al actualizar el perfil", error: error.message });
     }
-    arrendatarioBDD.nombre = nombre ?? arrendatarioBDD.nombre
-    arrendatarioBDD.apellido = apellido ?? arrendatarioBDD.apellido
-    arrendatarioBDD.direccion = direccion ?? arrendatarioBDD.direccion
-    arrendatarioBDD.celular = celular ?? arrendatarioBDD.celular
-    arrendatarioBDD.email = email ?? arrendatarioBDD.email
-    await arrendatarioBDD.save()
-    console.log(arrendatarioBDD)
-    res.status(200).json(arrendatarioBDD)
-}
+};
 
 const actualizarPassword = async (req,res)=>{
     const arrendatarioBDD = await Arrendatario.findById(req.arrendatarioBDD._id)
@@ -140,44 +202,6 @@ const listarArrendatarios = async (req, res) => {
     }
 };
 
-const subirAvatar = async (req, res) => {
-  try {
-    const arrendatarioBDD = await Arrendatario.findById(req.arrendatarioBDD._id)
-    if (!arrendatarioBDD) return res.status(404).json({ msg: "Arrendatario no encontrado" })
-
-    if (!req.files || !req.files.avatar) {
-      return res.status(400).json({ msg: "No se ha enviado ninguna imagen" })
-    }
-
-    const tempFilePath = req.files.avatar.tempFilePath
-
-    // Eliminar avatar anterior si existe
-    if (arrendatarioBDD.avatarArrenID) {
-      await cloudinary.uploader.destroy(arrendatarioBDD.avatarArrenID)
-    }
-
-    // Subir nueva imagen
-    const resultado = await cloudinary.uploader.upload(tempFilePath, {
-      folder: "avataresArrendatario"
-    })
-
-    // Guardar datos del nuevo avatar
-    arrendatarioBDD.avatarArren = resultado.secure_url
-    arrendatarioBDD.avatarArrenID = resultado.public_id
-    await arrendatarioBDD.save()
-
-    // Eliminar archivo temporal
-    await fs.remove(tempFilePath)
-
-    res.status(200).json({
-      msg: "Avatar actualizado correctamente",
-      avatarUrl: resultado.secure_url
-    })
-  } catch (error) {
-    console.error("Error al subir avatar:", error)
-    res.status(500).json({ msg: "Error al procesar la imagen", error: error.message })
-  }
-}
 
 export {
   registro,
@@ -189,6 +213,5 @@ export {
   perfil,
   actualizarPerfil,
   actualizarPassword,
-  listarArrendatarios,
-  subirAvatar
+  listarArrendatarios
 }
