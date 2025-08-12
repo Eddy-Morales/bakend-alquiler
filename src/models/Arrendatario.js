@@ -28,17 +28,20 @@ const arrendatarioSchema = new Schema({
     trim: true,
     unique: true
   },
-  avatarArren:{
-    type:String,
-    trim:true
+  avatarUrl: {
+    type: String,
+    trim: true,
+    default: null
   },
-  avatarArrenID:{
-    type:String,
-    trim:true
+  avatarArrenID: {
+    type: String,
+    trim: true,
+    default: null
   },
-  avatarArrenIA:{
-    type:String,
-    trim:true
+  avatarType: {
+    type: String,
+    enum: ['upload', 'ia'],
+    default: 'upload'
   },
   googleId: {
   type: String,
