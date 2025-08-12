@@ -42,8 +42,11 @@ router.get("/auth/google/callback",
     // URL del frontend (debe configurarse en variables de entorno)
     const frontendUrl = process.env.URL_FRONTEND; // Ajusta esto según tu configuración
     
+    // Corregir el formato de la URL base para evitar el doble slash
+    const baseUrl = frontendUrl.endsWith('/') ? frontendUrl.slice(0, -1) : frontendUrl;
+    
     // Construir la URL de redirección con los datos necesarios
-    const redirectUrl = `${frontendUrl}/auth/success?token=${token}&_id=${_id}&nombre=${encodeURIComponent(nombre || '')}&apellido=${encodeURIComponent(apellido || '')}&direccion=${encodeURIComponent(direccion || '')}&celular=${encodeURIComponent(celular || '')}&rol=${rol || 'arrendatario'}&email=${encodeURIComponent(email || '')}`;
+    const redirectUrl = `${baseUrl}/auth/success?token=${token}&_id=${_id}&nombre=${encodeURIComponent(nombre || '')}&apellido=${encodeURIComponent(apellido || '')}&direccion=${encodeURIComponent(direccion || '')}&celular=${encodeURIComponent(celular || '')}&rol=${rol || 'arrendatario'}&email=${encodeURIComponent(email || '')}`;
     
     // Redirigir al frontend en lugar de enviar JSON
     res.redirect(redirectUrl);
